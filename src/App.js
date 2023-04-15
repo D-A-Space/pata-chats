@@ -14,6 +14,7 @@ import {
   query,
 } from "firebase/firestore";
 import { generateUserIcon, randomFromArr } from "./helpers/user.icon.generator";
+import SentBubble from "./components/SentBubble";
 
 const appy = firebase.initializeApp({
   apiKey: "AIzaSyBPpaph0g52dKIHCveIExcPecx5V99ce34",
@@ -74,8 +75,7 @@ function App() {
     return () => unsubscribe;
   }, []);
   useEffect(() => {
-    const userAgent = window.clientInformation;
-    console.log("userAgent", userAgent);
+
     console.log(messages);
   }, [messages]);
 
@@ -108,29 +108,15 @@ function App() {
 
   return (
     <div className="App">
-      <p>{window?.clientInformation.appCodeName}</p>
-      <p>{window?.clientInformation.appName}</p>
-      <p>{window?.clientInformation.appVersion}</p>
-      <p>{window?.clientInformation.userAgent}</p>
-      <p>{window?.clientInformation.platform}</p>
-      <p>{window?.clientInformation.product}</p>
-      <hr />
       {!userId === "" || messages.length > 0 ? (
         messages.map((message) => (
-          <div key={message.id}>
-            <p>{message.name}</p>
-            <div className={"flex gap-3 items-center"}>
-              <img className="h-5 w-5" src={message.image} alt="avatar" />
-              <span
-                className={`${
-                  message.uid === userId ? "text-red-600" : "text-black"
-                }`}
-              >
-                {" "}
-                {message.text}
-              </span>
-            </div>
-          </div>
+          <React.Fragment key={message.id}>
+            <SentBubble
+              text={message.text}
+              image={message.image}
+              name={message.name}
+            />
+          </React.Fragment>
         ))
       ) : (
         <div>
