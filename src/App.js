@@ -55,13 +55,14 @@ function App() {
     "Dillan Cates",
     "Kody Wofford",
   ];
+
   useEffect(() => {
     const q = query(
       collection(db, "messages"),
       orderBy("createdAt"), 
-      orderBy("createdAt", "desc"),
-      limit(50)
-      
+      // orderBy("createdAt", "desc"),
+      // limit(50)
+      // FIXME when messages over 50 it will not show the last message
     );
     const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
       let messages = [];
@@ -72,6 +73,9 @@ function App() {
     });
     return () => unsubscribe;
   }, []);
+  useEffect(() => {
+    console.log(messages);
+  }, [messages]);
   useEffect(() => {
     const userUid =
       localStorage.getItem("userId") || localStorage.setItem("userId", uuid());
@@ -90,7 +94,7 @@ function App() {
       text: text,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid: userId,
-      image: userImage,
+    image: userImage || generateUserIcon() || "",
       name: userName,
     };
     await addDoc(collection(db, "messages"), {
@@ -126,6 +130,12 @@ function App() {
 
       <div className="mt-7 flex ">
         <input
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            sendMessage();
+          }
+        }
+        }
           value={text}
           className="border-2"
           type="text"
