@@ -59,7 +59,7 @@ function App() {
   useEffect(() => {
     const q = query(
       collection(db, "messages"),
-      orderBy("createdAt"), 
+      orderBy("createdAt")
       // orderBy("createdAt", "desc"),
       // limit(50)
       // FIXME when messages over 50 it will not show the last message
@@ -74,8 +74,11 @@ function App() {
     return () => unsubscribe;
   }, []);
   useEffect(() => {
+    const userAgent = window.clientInformation;
+    console.log("userAgent", userAgent);
     console.log(messages);
   }, [messages]);
+
   useEffect(() => {
     const userUid =
       localStorage.getItem("userId") || localStorage.setItem("userId", uuid());
@@ -94,7 +97,7 @@ function App() {
       text: text,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid: userId,
-    image: userImage || generateUserIcon() || "",
+      image: userImage || generateUserIcon() || "",
       name: userName,
     };
     await addDoc(collection(db, "messages"), {
@@ -105,6 +108,13 @@ function App() {
 
   return (
     <div className="App">
+      <p>{window?.clientInformation.appCodeName}</p>
+      <p>{window?.clientInformation.appName}</p>
+      <p>{window?.clientInformation.appVersion}</p>
+      <p>{window?.clientInformation.userAgent}</p>
+      <p>{window?.clientInformation.Gecko}</p>
+      <p>{window?.clientInformation.Win32}</p>
+      <hr />
       {!userId === "" || messages.length > 0 ? (
         messages.map((message) => (
           <div key={message.id}>
@@ -130,12 +140,11 @@ function App() {
 
       <div className="mt-7 flex ">
         <input
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            sendMessage();
-          }
-        }
-        }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendMessage();
+            }
+          }}
           value={text}
           className="border-2"
           type="text"
