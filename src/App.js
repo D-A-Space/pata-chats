@@ -13,6 +13,7 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
+import { generateUserIcon, randomFromArr } from "./helpers/user.icon.generator";
 
 const appy = firebase.initializeApp({
   apiKey: "AIzaSyBPpaph0g52dKIHCveIExcPecx5V99ce34",
@@ -29,7 +30,31 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [userId, setUserId] = useState(localStorage.getItem("userId") || "");
+  const [userImage, setUserImage] = useState("");
+  const [userName, setUserName] = useState("");
   // const user = firebase.auth().currentUser;
+  const fakeNamesArr = [
+    " Kelli Spears",
+    "Terrance Silva",
+    "Ananda Lynn",
+    "Dakotah Conti",
+    "Tate Hyde",
+    "Tamia Neeley",
+    "Kya Shumaker",
+    "Leanne Huber",
+    "Kara Teague",
+    "Natasha Odom",
+    "Jaleel New",
+    "Jonas Diggs",
+    "Tiffany Paris",
+    "Reina Diggs",
+    "Leigha Reich",
+    "Markell Pena",
+    "Magaly Ayers",
+    "Jenna Seibert",
+    "Dillan Cates",
+    "Kody Wofford",
+  ];
   useEffect(() => {
     const q = query(
       collection(db, "messages"),
@@ -48,13 +73,23 @@ function App() {
   useEffect(() => {
     const userUid =
       localStorage.getItem("userId") || localStorage.setItem("userId", uuid());
+    const userName =
+      localStorage.getItem("userName") ||
+      localStorage.setItem("userName", randomFromArr(fakeNamesArr));
+    const userImage =
+      localStorage.getItem("userImage") ||
+      localStorage.setItem("userImage", generateUserIcon());
+    setUserImage(userImage);
     setUserId(userUid);
-  }, []);
+    setUserName(userName);
+  }, [messages]);
   const sendMessage = async () => {
     const message = {
       text: text,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid: userId,
+      image: userImage,
+      name: userName,
     };
     await addDoc(collection(db, "messages"), {
       ...message,
@@ -67,7 +102,18 @@ function App() {
       {!userId === "" || messages.length > 0 ? (
         messages.map((message) => (
           <div key={message.id}>
-            <h3 className={`${message.uid === userId ? "text-red-600" : "text-black"}`}>{message.text}</h3>
+            <p>{message.name}</p>
+            <div className={"flex gap-3 items-center"}>
+              <img className="h-5 w-5" src={message.image} alt="avatar" />
+              <span
+                className={`${
+                  message.uid === userId ? "text-red-600" : "text-black"
+                }`}
+              >
+                {" "}
+                {message.text}
+              </span>
+            </div>
           </div>
         ))
       ) : (
@@ -76,7 +122,6 @@ function App() {
         </div>
       )}
 
-    
       <div className="mt-7 flex ">
         <input
           value={text}
