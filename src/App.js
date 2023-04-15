@@ -266,7 +266,7 @@ function App() {
             <button
               className="bg-[#123] text-white p-2 disabled:opacity-50"
               onClick={() => window.location.reload()}
-              disabled={!userName.length || userName.length < 3}
+              disabled={!userName?.length || userName?.length < 3}
             >
               Enter Room
             </button>
