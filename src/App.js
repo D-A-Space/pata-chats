@@ -15,6 +15,8 @@ import {
 } from "firebase/firestore";
 import { generateUserIcon, randomFromArr } from "./helpers/user.icon.generator";
 import SentBubble from "./components/SentBubble";
+import { RecievedBubble } from "./components/RecievedBubble";
+import { scrollTranscriptWindow } from "./helpers/scroll";
 
 const appy = firebase.initializeApp({
   apiKey: "AIzaSyBPpaph0g52dKIHCveIExcPecx5V99ce34",
@@ -75,7 +77,6 @@ function App() {
     return () => unsubscribe;
   }, []);
   useEffect(() => {
-
     console.log(messages);
   }, [messages]);
 
@@ -106,25 +107,47 @@ function App() {
     setText("");
   };
 
-  return (
-    <div className="App">
-      {!userId === "" || messages.length > 0 ? (
-        messages.map((message) => (
-          <React.Fragment key={message.id}>
-            <SentBubble
-              text={message.text}
-              image={message.image}
-              name={message.name}
-            />
-          </React.Fragment>
-        ))
-      ) : (
-        <div>
-          <h3>loading</h3>
-        </div>
-      )}
+  useEffect(() => {
+    scrollTranscriptWindow();
+  }, [messages]);
 
-      <div className="mt-7 flex ">
+  return (
+    <div
+      style={{ background: "linear-gradient(#0007, #0000), #123" }}
+      className="grid grid-cols-1 grid-rows-7 h-screen w-screen pb-10"
+    >
+      <div
+        id="chat"
+        className="row-span-6 flex flex-col gap-7 p-5 overflow-y-auto"
+      >
+        {!userId === "" || messages.length > 0 ? (
+          messages.map((message) =>
+            message.uid === userId ? (
+              <div className="self-end" key={message.id}>
+                <SentBubble
+                  text={message.text}
+                  image={message.image}
+                  name={message.name}
+                />
+              </div>
+            ) : (
+              <div className="self-start" key={message.id}>
+                <RecievedBubble
+                  text={message.text}
+                  image={message.image}
+                  name={message.name}
+                />
+              </div>
+            )
+          )
+        ) : (
+          <div>
+            <h3>loading</h3>
+          </div>
+        )}
+      </div>
+
+      <div className="relative row-sapn-1 px-2 pt-3 flex gap-2 justify-center items-center">
         <input
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -132,15 +155,35 @@ function App() {
             }
           }}
           value={text}
-          className="border-2"
+          className="border-2 border-neutral-500 w-8/12 p-3 rounded-full bg-slate-700/50 text-white"
           type="text"
           onChange={(e) => {
             setText(e.target.value);
           }}
         />{" "}
-        <button onClick={() => sendMessage()} className="p-3 bg-red-500">
-          SEND
+        <button
+          onClick={() => {
+            if (text.trim() !== "") {
+              sendMessage();
+            }
+          }}
+          disabled={text.trim() === ""}
+          className="p-3 rounded-full bg-violet-500 shadow-md shadow-neutral-700 active:shadow-none disabled:grayscale disabled:shadow-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="25"
+            height="25"
+            fill="currentColor"
+            class="bi bi-send-fill"
+            viewBox="0 0 16 16"
+          >
+            <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z" />{" "}
+          </svg>
         </button>
+        <span className="absolute -bottom-5 text-neutral-500 text-sm">
+          Send as {userName}
+        </span>
       </div>
     </div>
   );
