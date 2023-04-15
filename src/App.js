@@ -164,6 +164,9 @@ function App() {
         <button
           onClick={() => {
             if (text.trim() !== "") {
+              if (text.length > 50) {
+                return alert("too many letters");
+              }
               sendMessage();
             }
           }}
