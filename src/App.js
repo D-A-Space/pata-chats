@@ -112,8 +112,8 @@ function App() {
       <p>{window?.clientInformation.appName}</p>
       <p>{window?.clientInformation.appVersion}</p>
       <p>{window?.clientInformation.userAgent}</p>
-      <p>{window?.clientInformation.Gecko}</p>
-      <p>{window?.clientInformation.Win32}</p>
+      <p>{window?.clientInformation.platform}</p>
+      <p>{window?.clientInformation.product}</p>
       <hr />
       {!userId === "" || messages.length > 0 ? (
         messages.map((message) => (
