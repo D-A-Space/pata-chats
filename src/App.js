@@ -62,6 +62,13 @@ function App() {
     }
   }, [spamCount, spam]);
 
+  useEffect(()=>{
+    if(room && room.trim() !== '' && room.length > 0){
+
+      window.document.title = `Pata Chats - ${room.replace("_"," ")}`
+    }
+  },[room])
+
   useEffect(() => {
     if (spamCount > 4 && !spam) {
       setSpamCount(10);
@@ -139,11 +146,13 @@ function App() {
   }, [room]);
   const welcomeMessage = () => {
     return {
-      text: `Welcome to ${room} Hub Have a nice day`,
+      text: `Welcome to ${room
+        .replace("_", " ")
+        } Hub Have a nice day`,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid: "BOT",
       image: generateUserIcon(),
-      name: `${room} BOT`,
+      name: `${room.replace("_", " ")} BOT`,
     };
   };
 
@@ -239,7 +248,7 @@ function App() {
                 className=" flex flex-col gap-7 p-5 overflow-y-auto flex-1"
               >
                 {!userId === "" || messages.length > 0 ? (
-                  messages.map((message , i) =>
+                  messages.map((message, i) =>
                     message.uid === userId ? (
                       <div className="self-end" key={i}>
                         <SentBubble
