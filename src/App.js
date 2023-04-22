@@ -3,7 +3,7 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 import "firebase/compat/analytics";
 import uuid from "react-uuid";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   addDoc,
   collection,
@@ -17,6 +17,28 @@ import { generateUserIcon, randomFromArr } from "./helpers/user.icon.generator";
 import SentBubble from "./components/SentBubble";
 import { RecievedBubble } from "./components/RecievedBubble";
 import { scrollTranscriptWindow } from "./helpers/scroll";
+import Filter from "bad-words";
+const filter = new Filter();
+// var cleanser = require("profanity-cleanser");
+// cleanser.setLocale();
+
+// var inputString = "Your ass is shit";
+
+// // output becomes "You *** is ****"
+// var output = cleanser.replace(inputString);
+
+function replaceBadWords(str, badWords) {
+  const regex = new RegExp(`\\b(${badWords.join("|")})\\b`, "gi");
+  return str.replace(regex, (match) => "*".repeat(match.length));
+}
+
+const badWords = ["bad", "words", "profanity"];
+const inputStr = "This is a sentence with bad words and profanity.";
+const outputStr = replaceBadWords(inputStr, badWords);
+console.log(outputStr);
+// console.log(output);
+// filter.addWords("مرحبا", "bad", "word");
+// console.log(filter.clean("bad")); //Don't be an ******
 
 const appy = firebase.initializeApp({
   apiKey: "AIzaSyBPpaph0g52dKIHCveIExcPecx5V99ce34",
@@ -37,6 +59,27 @@ function App() {
   const [userName, setUserName] = useState("");
   const [isUser, setIsUser] = useState(false);
   const [room, setRoom] = useState("");
+  const [spamCount, setSpamCount] = useState(0);
+  const [spam, setSpam] = useState(false);
+  const textareaRef = useRef(null);
+  useEffect(() => {
+    if (spamCount > 0) {
+      const interval = setInterval(() => {
+        setSpamCount((prev) => prev - 1);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [spamCount]);
+
+  useEffect(() => {
+    if (spamCount > 4) {
+      setSpam(true);
+    } else if (spamCount === 0) {
+      setSpam(false);
+    }
+
+    console.log(spamCount);
+  }, [spamCount]);
 
   const params = new URLSearchParams(window.location.search);
   useEffect(() => {
@@ -115,7 +158,7 @@ function App() {
   }, [messages]);
   const sendMessage = async () => {
     const message = {
-      text: text.trim(),
+      text: filter.clean(text.trim()),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       uid: userId,
       image: userImage || generateUserIcon() || "",
@@ -136,7 +179,12 @@ function App() {
       if (text.length > 100) {
         return alert("Too many letters");
       }
+      if (spam) {
+        return;
+      }
       sendMessage();
+      setSpamCount((prev) => prev + 1);
+      textareaRef?.current.focus();
     }
   };
 
@@ -197,8 +245,15 @@ function App() {
           </div>
 
           <div className=" max-h-[33%] px-2 pt-3 space-y-2">
+            {spam && (
+              <p className="text-sm text-red-500">
+                Slow down there, you can send a new message in {spamCount}{" "}
+                seconds
+              </p>
+            )}
             <div className="flex gap-2 justify-center items-center">
               <textarea
+                ref={textareaRef}
                 id="myInput"
                 // onKeyDown={(e) => {
                 //   if (e.key === "Enter") {
