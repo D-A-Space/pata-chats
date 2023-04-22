@@ -86,7 +86,7 @@ export const generateUserIcon = () => {
     "tongueOut",
     "wideSmile",
   ];
- 
+
 
   return `https://api.dicebear.com/6.x/fun-emoji/svg?radius=20&backgroundColor=${randomFromArr(
     backgroundColor
